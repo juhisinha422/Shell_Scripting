@@ -7,3 +7,4 @@ do
   mkdir "demo$num"
 done
 
+# to remove all folders : rm -r demo*
