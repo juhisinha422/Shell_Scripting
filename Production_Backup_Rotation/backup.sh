@@ -1,6 +1,7 @@
 # mkdir data
 # cd data
 # touch file{1..5}.txt
+# cd ~
 
 # vi backup.sh :
 
