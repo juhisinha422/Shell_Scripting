@@ -23,7 +23,7 @@ down:
         $(DOCKER_COMPOSE) down
 
 clean:
-        docker system prune 
+        docker system prune -f
 
 ----------------------------------------------
 Commands:
