@@ -1,7 +1,5 @@
 #!/bin/bash
 
-# Deploy a Django app using Docker with safe error handling and permissions
-
 # Function to clone the Django app code
 code_clone() {
     echo "Cloning the Django app..."
@@ -14,14 +12,14 @@ code_clone() {
         }
     fi
     cd django-notes-app || {
-        echo "❌ Failed to enter the code directory."
+        echo "❌ Failed to enter code directory."
         return 1
     }
 }
 
-# Function to install required dependencies including Docker & NGINX
+# Function to install Docker and Docker Compose
 install_requirements() {
-    echo "Installing dependencies..."
+    echo "Installing Docker and Docker Compose..."
 
     sudo apt-get update
     sudo apt-get install -y \
@@ -29,97 +27,59 @@ install_requirements() {
         curl \
         gnupg \
         lsb-release \
-        nginx || {
-        echo "❌ Failed to install base packages."
-        return 1
-    }
+        nginx || return 1
 
-    # Add Docker’s official GPG key
     sudo mkdir -p /etc/apt/keyrings
     curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
 
-    # Set up the Docker stable repository
     echo \
       "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
       $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
 
     sudo apt-get update
-
-    # Install Docker Engine
-    sudo apt-get install -y docker-ce docker-ce-cli containerd.io || {
-        echo "❌ Docker installation failed."
+    sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin || {
+        echo "❌ Failed to install Docker or Compose."
         return 1
     }
 }
 
-# Function to ensure Docker and NGINX services are running
+# Function to restart services
 required_restarts() {
-    echo "Enabling and restarting services..."
-    sudo chown "$USER" /var/run/docker.sock
-    #sudo systemctl enable docker
-    #sudo systemctl enable nginx
-    #sudo systemctl restart docker
-    #sudo systemctl restart nginx
+    echo "Restarting services..."
+    sudo systemctl enable docker
+    sudo systemctl restart docker
+    sudo systemctl enable nginx
+    sudo systemctl restart nginx
 }
 
-# Function to build and run the Docker container
+# Function to deploy the app using docker-compose
 deploy() {
-    echo "Deploying the Django app using Docker..."
+    echo "Deploying the Django app with Docker Compose..."
 
-    # Check if Dockerfile exists
-    if [ ! -f Dockerfile ]; then
-        echo "❌ Dockerfile not found in the project directory."
+    if [ ! -f docker-compose.yml ]; then
+        echo "❌ docker-compose.yml not found!"
         return 1
     fi
 
-    # Check if port 8000 is already in use
-    if sudo lsof -i :8000 >/dev/null; then
-        echo "❌ Port 8000 is already in use."
-        return 1
-    fi
+    # Stop any existing containers
+    sudo docker compose down
 
-    sudo docker build -t notes-app:latest . || {
-        echo "❌ Docker build failed."
+    # Build and run containers
+    sudo docker compose up --build -d || {
+        echo "❌ Docker Compose up failed."
         return 1
     }
-
-    sudo docker run -d -p 8000:8000 notes-app:latest || {
-        echo "❌ Docker run failed."
-        return 1
-    }
-
-    echo "✅ App deployed successfully on http://localhost:8000"
 }
 
-# Main script starts here
+# Main
 echo "********** DEPLOYMENT STARTED **********"
 
-# Clone project
-if ! code_clone; then
-    echo "🚫 Code setup failed."
-    exit 1
-fi
-
-# Install system requirements
-if ! install_requirements; then
-    echo "🚫 Dependency installation failed."
-    exit 1
-fi
-
-# Restart services
-if ! required_restarts; then
-    echo "🚫 Service restart failed."
-    exit 1
-fi
-
-# Deploy app
+if ! code_clone; then exit 1; fi
+if ! install_requirements; then exit 1; fi
+if ! required_restarts; then exit 1; fi
 if ! deploy; then
-    echo "🚫 Deployment failed. Please check logs or notify admin."
-    # Here you could add email/slack notification logic
+    echo "🚫 Deployment failed. Please notify admin."
     exit 1
 fi
 
-echo "********** DEPLOYMENT COMPLETE **********"
-
-
-#use publicIP:8000
+echo "✅ Deployment complete at http://localhost:8000"
