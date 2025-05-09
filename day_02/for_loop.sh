@@ -14,3 +14,6 @@ do
 	mkdir "$1$num"
 done
 
+#---------------------
+
+# Execute bash for_loop.sh day 01 90
