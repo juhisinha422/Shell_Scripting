@@ -49,6 +49,7 @@ give permissions : chmod 754 <file_name>
 NOTE: 7 = RWX, 5 = R+X , 4 = R
 
 Execute : ./ hello.sh
+or bash hello.sh
 ================
 
 using vim:
@@ -58,3 +59,20 @@ qa (quit without saving)
 
 ----------------
 where bash is kept: which bash
+
+
+=============================
+
+Day-02:
+
+single line comments : 
+# this is juhi
+
+multi line comments:
+
+<< comment
+Anything
+written 
+here will not be executed
+comment
+
