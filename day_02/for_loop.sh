@@ -17,3 +17,5 @@ done
 #---------------------
 
 # Execute bash for_loop.sh day 01 90
+# to remove all day folders (multiplefolders) : rm -r day*
+
