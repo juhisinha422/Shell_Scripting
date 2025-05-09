@@ -48,3 +48,6 @@ using vim:
 vim hello.txt
 esc and :wq (write,save and quit)
 qa (quit without saving)
+
+----------------
+where bash is kept: which bash
