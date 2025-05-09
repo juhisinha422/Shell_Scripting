@@ -42,6 +42,13 @@ Requirement:
 2. Linux machine
 3. Connect ssh
 4. text editor (vim, vi, nano, gedit)
+5. Execute 
+ls -l (check permissions)
+give permissions : chmod 754 <file_name>
+
+NOTE: 7 = RWX, 5 = R+X , 4 = R
+
+Execute : ./ hello.sh
 ================
 
 using vim:
