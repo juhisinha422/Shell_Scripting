@@ -1,14 +1,14 @@
 #!/bin/bash
-set -euo pipefail
+set -euo pipefail  # if we are doing error handling, then it will display beautifully (advanced shell scripting - flag)
 
-check_awscli() {
+check_awscli() {   # agar aws command nhi mil pta toh bol deta install then exit
     if ! command -v aws &> /dev/null; then
         echo "AWS CLI is not installed. Please install it first." >&2
         exit 1
     fi
 }
 
-install_awscli() {
+install_awscli() { # installing aws cli
     echo "Installing AWS CLI v2 on Linux..."
 
     # Download and install AWS CLI v2
