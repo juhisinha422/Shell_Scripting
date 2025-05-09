@@ -8,6 +8,7 @@ written
 here will not be execute
 comment
 
+#variables
 name="babitaji"
 
 echo "Name is $name, and date is $(date)"
