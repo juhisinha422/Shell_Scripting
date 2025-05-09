@@ -1,0 +1,118 @@
+#!/bin/bash
+
+# Deploy a Django app and handle errors
+
+# Function to clone the Django app code
+code_clone() {
+    echo "Cloning the Django app..."
+    if [ -d "django-notes-app" ]; then
+        echo "The code directory already exists. Skipping clone."
+    else
+        git clone https://github.com/LondheShubham153/django-notes-app.git || {
+            echo "Failed to clone the code."
+            return 1
+        }
+    fi
+    cd django-notes-app || {
+        echo "Failed to enter code directory."
+        return 1
+    }
+}
+
+# Function to install required dependencies
+install_requirements() {
+    echo "Installing dependencies..."
+
+    sudo apt-get update
+    sudo apt-get install -y \
+        ca-certificates \
+        curl \
+        gnupg \
+        lsb-release \
+        nginx || {
+        echo "Basic dependencies installation failed."
+        return 1
+    }
+
+    # Add Docker’s official GPG key
+    sudo mkdir -p /etc/apt/keyrings
+    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+
+    # Set up the Docker repository
+    echo \
+      "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
+      $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+    sudo apt-get update
+
+    # Install Docker
+    sudo apt-get install -y docker-ce docker-ce-cli containerd.io || {
+        echo "Docker installation failed."
+        return 1
+    }
+}
+
+# Function to perform required restarts
+required_restarts() {
+    echo "Performing required restarts..."
+    sudo systemctl enable docker
+    sudo systemctl enable nginx
+    sudo systemctl restart docker
+    sudo systemctl restart nginx
+}
+
+# Function to deploy the Django app
+deploy() {
+    echo "Building and deploying the Django app..."
+
+    # Optional: check if port 8000 is in use
+    if lsof -i :8000 >/dev/null; then
+        echo "Port 8000 is already in use. Exiting..."
+        return 1
+    fi
+
+    if [ ! -f Dockerfile ]; then
+        echo "Dockerfile not found in project root."
+        return 1
+    fi
+
+    sudo docker build -t notes-app:latest . || {
+        echo "Docker build failed."
+        return 1
+    }
+
+    sudo docker run -d -p 8000:8000 notes-app:latest || {
+        echo "Docker run failed."
+        return 1
+    }
+}
+
+# Main deployment script
+echo "********** DEPLOYMENT STARTED *********"
+
+# Clone the code
+if ! code_clone; then
+    echo "Code setup failed"
+    exit 1
+fi
+
+# Install dependencies
+if ! install_requirements; then
+    echo "Installation failed"
+    exit 1
+fi
+
+# Perform required restarts
+if ! required_restarts; then
+    echo "System fault identified"
+    exit 1
+fi
+
+# Deploy the app
+if ! deploy; then
+    echo "Deployment failed. Mailing the admin..."
+    # Add your sendmail or notification logic here
+    exit 1
+fi
+
+echo "********** DEPLOYMENT DONE *********"
