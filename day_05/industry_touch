@@ -1,0 +1,29 @@
+# if my os is linux then build steps should be diff and if my os is windows then build steps shoudl be diff.
+
+# .PHONY build up down run
+#phonylist all the commands that we need
+
+DOCKER_COMPOSE := docker-compose
+OS := $(shell uname)
+
+build:
+ifeq ($(OS), Linux)
+        @echo "Running in $(OS)"
+        $(DOCKER_COMPOSE) build
+endif
+ifeq ($(OS) , Windows_NT)
+        @echo "Please add windows commands"
+endif
+up:
+        $(DOCKER_COMPOSE) up -d
+
+down:
+        $(DOCKER_COMPOSE) down
+
+clean:
+        docker system prune
+
+#-----------------------------------
+# commands
+make build
+make clean
