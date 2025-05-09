@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Deploy a Django app and handle errors
+# Deploy a Django app using Docker with safe error handling and permissions
 
 # Function to clone the Django app code
 code_clone() {
@@ -9,17 +9,17 @@ code_clone() {
         echo "The code directory already exists. Skipping clone."
     else
         git clone https://github.com/LondheShubham153/django-notes-app.git || {
-            echo "Failed to clone the code."
+            echo "❌ Failed to clone the code."
             return 1
         }
     fi
     cd django-notes-app || {
-        echo "Failed to enter code directory."
+        echo "❌ Failed to enter the code directory."
         return 1
     }
 }
 
-# Function to install required dependencies
+# Function to install required dependencies including Docker & NGINX
 install_requirements() {
     echo "Installing dependencies..."
 
@@ -30,7 +30,7 @@ install_requirements() {
         gnupg \
         lsb-release \
         nginx || {
-        echo "Basic dependencies installation failed."
+        echo "❌ Failed to install base packages."
         return 1
     }
 
@@ -38,81 +38,88 @@ install_requirements() {
     sudo mkdir -p /etc/apt/keyrings
     curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
 
-    # Set up the Docker repository
+    # Set up the Docker stable repository
     echo \
       "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
       $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
 
     sudo apt-get update
 
-    # Install Docker
+    # Install Docker Engine
     sudo apt-get install -y docker-ce docker-ce-cli containerd.io || {
-        echo "Docker installation failed."
+        echo "❌ Docker installation failed."
         return 1
     }
 }
 
-# Function to perform required restarts
+# Function to ensure Docker and NGINX services are running
 required_restarts() {
-    echo "Performing required restarts..."
-    sudo systemctl enable docker
-    sudo systemctl enable nginx
-    sudo systemctl restart docker
-    sudo systemctl restart nginx
+    echo "Enabling and restarting services..."
+    sudo chown "$USER" /var/run/docker.sock
+    #sudo systemctl enable docker
+    #sudo systemctl enable nginx
+    #sudo systemctl restart docker
+    #sudo systemctl restart nginx
 }
 
-# Function to deploy the Django app
+# Function to build and run the Docker container
 deploy() {
-    echo "Building and deploying the Django app..."
+    echo "Deploying the Django app using Docker..."
 
-    # Optional: check if port 8000 is in use
-    if lsof -i :8000 >/dev/null; then
-        echo "Port 8000 is already in use. Exiting..."
+    # Check if Dockerfile exists
+    if [ ! -f Dockerfile ]; then
+        echo "❌ Dockerfile not found in the project directory."
         return 1
     fi
 
-    if [ ! -f Dockerfile ]; then
-        echo "Dockerfile not found in project root."
+    # Check if port 8000 is already in use
+    if sudo lsof -i :8000 >/dev/null; then
+        echo "❌ Port 8000 is already in use."
         return 1
     fi
 
     sudo docker build -t notes-app:latest . || {
-        echo "Docker build failed."
+        echo "❌ Docker build failed."
         return 1
     }
 
     sudo docker run -d -p 8000:8000 notes-app:latest || {
-        echo "Docker run failed."
+        echo "❌ Docker run failed."
         return 1
     }
+
+    echo "✅ App deployed successfully on http://localhost:8000"
 }
 
-# Main deployment script
-echo "********** DEPLOYMENT STARTED *********"
+# Main script starts here
+echo "********** DEPLOYMENT STARTED **********"
 
-# Clone the code
+# Clone project
 if ! code_clone; then
-    echo "Code setup failed"
+    echo "🚫 Code setup failed."
     exit 1
 fi
 
-# Install dependencies
+# Install system requirements
 if ! install_requirements; then
-    echo "Installation failed"
+    echo "🚫 Dependency installation failed."
     exit 1
 fi
 
-# Perform required restarts
+# Restart services
 if ! required_restarts; then
-    echo "System fault identified"
+    echo "🚫 Service restart failed."
     exit 1
 fi
 
-# Deploy the app
+# Deploy app
 if ! deploy; then
-    echo "Deployment failed. Mailing the admin..."
-    # Add your sendmail or notification logic here
+    echo "🚫 Deployment failed. Please check logs or notify admin."
+    # Here you could add email/slack notification logic
     exit 1
 fi
 
-echo "********** DEPLOYMENT DONE *********"
+echo "********** DEPLOYMENT COMPLETE **********"
+
+
+#use publicIP:8000
