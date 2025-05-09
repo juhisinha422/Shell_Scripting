@@ -1,0 +1,46 @@
+git clone https://github.com/LondheShubham153/two-tier-flask-app.git
+cd two-tier-flask-app
+ls
+rm Makefile 
+vi Makefile
+  -----------------------
+
+
+vi Makefile
+
+
+DOCKER_COMPOSE := docker-compose
+
+OS := $(shell name)
+
+build:
+        $(DOCKER_COMPOSE) build
+
+up:
+        $(DOCKER_COMPOSE) up -d
+
+down:
+        $(DOCKER_COMPOSE) down
+
+clean:
+        docker system prune -y
+
+----------------------------------------------
+Commands:
+make build
+sudo apt install make
+make build
+sudo apt-get update -y
+sudo apt-get install docker.io docker compose
+sudo chown $USER /var/run/docker.sock
+docker ps
+make build
+make up 
+docker ps
+
+Go AWS -> Security grp -> enable port no 5000
+
+To stop the application: 
+make down
+
+
