@@ -7,3 +7,6 @@ echo "you entered $username"
 sudo useradd -m $username
 
 echo "New User added"
+
+
+# Note : we can check here that the user is created . (cat /etc/passwd)
