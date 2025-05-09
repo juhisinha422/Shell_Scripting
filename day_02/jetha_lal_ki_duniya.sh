@@ -19,4 +19,5 @@ read username
 
 echo "You entered $username"
 
+# arguments
 echo "The characters in $0 are:  $1 $2"
