@@ -1,7 +1,7 @@
 #!/bin/bash
 
 << disclaimer
-This is just for infotainment purpose
+This is just for infotainment purpose... (disclaimer is a tag we can give anything comment, description,etc.)
 disclaimer
 
 # This is function definition
