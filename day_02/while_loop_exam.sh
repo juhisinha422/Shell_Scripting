@@ -7,3 +7,5 @@ do
 	echo "lol"
 	num=$num+1
 done
+
+#Prints lol 5 times
