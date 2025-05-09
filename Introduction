@@ -5,3 +5,46 @@ Advanced scripting and debugging
 Real-World applications and integration
 Shell Mastery and Continuos Learning
 projects to keep up with the industry
+
+=============================================================
+Intro:
+apps - shell - kernel (c prog) - hardware
+
+shell commands need to communicate with shell
+print - echo 
+folder - mkdir
+list files - ls
+
+commands written in a sequence is called as shell scripting.
+
+----------------------
+History: 
+linus torvald created linux but he needed shell.
+Steve Bourne helps in creating shell
+he created shell (sh) - in location : /bin/sh (shell files kept here)
+
+Improvements:
+Bourne Again Shell (BASH) : location - /bin/bash
+
+----------------
+Other:
+csh (corn shell)
+ksh
+Fish
+=============
+
+trending : BASH
+
+
+---
+Requirement:
+1. understanding BASH
+2. Linux machine
+3. Connect ssh
+4. text editor (vim, vi, nano, gedit)
+================
+
+using vim:
+vim hello.txt
+esc and :wq (write,save and quit)
+qa (quit without saving)
